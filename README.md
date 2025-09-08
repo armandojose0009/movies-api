@@ -1,234 +1,297 @@
-# 🎬 Movies API - Sistema de Gestión de Reservas de Cine
+# 🎬 Movies API - Cinema Reservation Management System
 
-Sistema backend desarrollado con NestJS y PostgreSQL para gestionar reservas de películas en salas de cine.
+Backend system built with NestJS and PostgreSQL to manage movie reservations in cinema theaters.
 
-## 📋 Características
+## 📋 Features
 
-- ✅ CRUD completo de películas
-- ✅ CRUD completo de salas de cine
-- ✅ Gestión de funciones (showtimes) con validaciones
-- ✅ Sistema de compra de tickets con control de capacidad
-- ✅ Validación de fechas futuras para funciones
-- ✅ Prevención de sobreventa de asientos
-- ✅ Documentación automática con Swagger
-- ✅ Migraciones de base de datos
-- ✅ Script de datos de prueba (seed)
-- ✅ Dockerización completa
+- ✅ Complete CRUD for movies
+- ✅ Complete CRUD for cinema theaters
+- ✅ Showtime management with validations
+- ✅ Ticket purchasing system with capacity control
+- ✅ Future date validation for showtimes
+- ✅ Seat overselling prevention
+- ✅ Automatic Swagger documentation
+- ✅ Database migrations
+- ✅ Test data seeding script
+- ✅ Complete Dockerization
+- ✅ Environment-based configuration
 
-## 🏗️ Arquitectura y Decisiones Técnicas
+## 🏗️ Architecture and Technical Decisions
 
-### Estructura del Proyecto
+### Project Structure
+
 ```
 src/
-├── config/          # Configuración de base de datos
-├── entities/        # Entidades TypeORM
-├── movies/          # Módulo de películas
-├── cinemas/         # Módulo de salas de cine
-├── showtimes/       # Módulo de funciones
-├── tickets/         # Módulo de tickets
-└── database/        # Migraciones y seeds
+├── common/          # Shared constants and utilities
+├── config/          # Database configuration
+├── entities/        # TypeORM entities
+├── movies/          # Movies module
+├── cinemas/         # Cinema theaters module
+├── showtimes/       # Showtimes module
+├── tickets/         # Tickets module
+└── database/        # Migrations and seeds
 ```
 
-### Decisiones de Arquitectura
+### Architecture Decisions
 
-1. **Modular por Dominio**: Cada entidad tiene su propio módulo con controlador, servicio y DTOs
-2. **Validaciones en Capas**: 
-   - DTOs con class-validator para validación de entrada
-   - Lógica de negocio en servicios
-   - Constraints de base de datos para integridad
-3. **Relaciones TypeORM**: Uso de foreign keys y relaciones para mantener integridad referencial
-4. **Separación de Responsabilidades**: Controladores solo manejan HTTP, servicios contienen lógica de negocio
+1. **Domain-based Modules**: Each entity has its own module with controller, service, and DTOs
+2. **Layered Validations**:
+   - DTOs with class-validator for input validation
+   - Business logic in services
+   - Database constraints for data integrity
+3. **TypeORM Relations**: Foreign keys and relationships for referential integrity
+4. **Separation of Concerns**: Controllers handle HTTP only, services contain business logic
+5. **Centralized Messages**: All error and success messages in constants file
 
-### Librerías Utilizadas
+### Libraries Used
 
-- **NestJS**: Framework principal por su arquitectura modular y decoradores
-- **TypeORM**: ORM robusto con soporte completo para PostgreSQL
-- **class-validator**: Validación declarativa de DTOs
-- **Swagger**: Documentación automática de API
-- **PostgreSQL**: Base de datos relacional para integridad de datos
+- **NestJS**: Main framework for its modular architecture and decorators
+- **TypeORM**: Robust ORM with full PostgreSQL support
+- **class-validator**: Declarative DTO validation
+- **Swagger**: Automatic API documentation
+- **PostgreSQL**: Relational database for data integrity
 
 ### Trade-offs
 
-- **Sincronización vs Migraciones**: Se usa `synchronize: true` en desarrollo para rapidez, migraciones en producción
-- **Validación Duplicada**: Validaciones tanto en DTOs como en servicios para robustez
-- **Relaciones Eager vs Lazy**: Se cargan relaciones explícitamente para control de performance
+- **Sync vs Migrations**: Uses `synchronize: true` in development for speed, migrations in production
+- **Duplicate Validation**: Validations in both DTOs and services for robustness
+- **Eager vs Lazy Relations**: Relations loaded explicitly for performance control
 
-## 🚀 Instalación y Configuración
+## 🚀 Installation and Setup
 
-### Prerrequisitos
+### Prerequisites
+
 - Node.js 18+
-- Docker y Docker Compose
-- PostgreSQL (si no usas Docker)
+- Docker and Docker Compose
+- PostgreSQL (if not using Docker)
 
-### Opción 1: Con Docker (Recomendado)
+### Environment Configuration
 
-1. **Clonar el repositorio**
+**IMPORTANT**: Both Docker and local setup require environment variables configuration.
+
+1. **Copy environment template**
+
+```bash
+cp .env.example .env
+```
+
+2. **Edit .env file with your settings**
+
+```env
+NODE_ENV=development
+PORT=3000
+
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=movies_user
+DB_PASSWORD=movies_pass
+DB_DATABASE=movies_db
+```
+
+### Option 1: With Docker (Recommended)
+
+1. **Clone repository**
+
 ```bash
 git clone <repository-url>
 cd movies-api
 ```
 
-2. **Levantar con Docker Compose**
+2. **Configure environment**
+
+```bash
+cp .env.example .env
+# Edit .env with your database settings
+```
+
+3. **Start with Docker Compose**
+
 ```bash
 docker-compose up --build
 ```
 
-La aplicación estará disponible en `http://localhost:3000`
+The application will be available at `http://localhost:3000`
 
-### Opción 2: Instalación Local
+**Note**: Docker Compose automatically reads variables from `.env` file for both the application and PostgreSQL container.
 
-1. **Instalar dependencias**
+### Option 2: Local Installation
+
+1. **Install dependencies**
+
 ```bash
 npm install
 ```
 
-2. **Configurar variables de entorno**
+2. **Configure environment variables**
+
 ```bash
 cp .env.example .env
-# Editar .env con tus configuraciones de base de datos
+# Edit .env with your database configurations
 ```
 
-3. **Ejecutar migraciones**
+3. **Run migrations**
+
 ```bash
 npm run migration:run
 ```
 
-4. **Cargar datos de prueba (opcional)**
+4. **Load test data (optional)**
+
 ```bash
 npm run seed
 ```
 
-5. **Iniciar la aplicación**
+5. **Start application**
+
 ```bash
-# Desarrollo
+# Development
 npm run start:dev
 
-# Producción
+# Production
 npm run build
 npm run start:prod
 ```
 
-## 📚 Documentación de API
+## 📚 API Documentation
 
-Una vez que la aplicación esté ejecutándose, la documentación interactiva de Swagger estará disponible en:
+Once the application is running, interactive Swagger documentation will be available at:
 
 **🔗 http://localhost:3000/api**
 
-### Endpoints Principales
+### Main Endpoints
 
-#### Películas
-- `GET /movies` - Listar todas las películas
-- `POST /movies` - Crear nueva película
-- `GET /movies/:id` - Obtener película por ID
-- `PATCH /movies/:id` - Actualizar película
-- `DELETE /movies/:id` - Eliminar película
+#### Movies
 
-#### Salas de Cine
-- `GET /cinemas` - Listar todas las salas
-- `POST /cinemas` - Crear nueva sala
-- `GET /cinemas/:id` - Obtener sala por ID
-- `PATCH /cinemas/:id` - Actualizar sala
-- `DELETE /cinemas/:id` - Eliminar sala
+- `GET /movies` - List all movies
+- `POST /movies` - Create new movie
+- `GET /movies/:id` - Get movie by ID
+- `PATCH /movies/:id` - Update movie
+- `DELETE /movies/:id` - Delete movie
 
-#### Funciones
-- `GET /showtimes` - Listar todas las funciones
-- `POST /showtimes` - Crear nueva función
-- `GET /showtimes/:id` - Obtener función por ID
-- `GET /showtimes/:id/available-seats` - Asientos disponibles
-- `PATCH /showtimes/:id` - Actualizar función
-- `DELETE /showtimes/:id` - Eliminar función
+#### Cinema Theaters
+
+- `GET /cinemas` - List all cinema theaters
+- `POST /cinemas` - Create new cinema theater
+- `GET /cinemas/:id` - Get cinema theater by ID
+- `PATCH /cinemas/:id` - Update cinema theater
+- `DELETE /cinemas/:id` - Delete cinema theater
+
+#### Showtimes
+
+- `GET /showtimes` - List all showtimes
+- `POST /showtimes` - Create new showtime
+- `GET /showtimes/:id` - Get showtime by ID
+- `GET /showtimes/:id/available-seats` - Get available seats
+- `PATCH /showtimes/:id` - Update showtime
+- `DELETE /showtimes/:id` - Delete showtime
 
 #### Tickets
-- `GET /tickets` - Listar todos los tickets
-- `POST /tickets` - Comprar ticket
-- `GET /tickets/:id` - Obtener ticket por ID
-- `GET /tickets/showtime/:showtimeId` - Tickets por función
-- `DELETE /tickets/:id` - Cancelar ticket
+
+- `GET /tickets` - List all tickets
+- `POST /tickets` - Purchase ticket
+- `GET /tickets/:id` - Get ticket by ID
+- `GET /tickets/showtime/:showtimeId` - Get tickets by showtime
+- `DELETE /tickets/:id` - Cancel ticket
 
 ## 🧪 Testing
 
 ```bash
-# Tests unitarios
+# Unit tests
 npm run test
 
-# Tests con coverage
+# Tests with coverage
 npm run test:cov
 
-# Tests e2e
+# E2E tests
 npm run test:e2e
 
-# Tests en modo watch
+# Tests in watch mode
 npm run test:watch
 ```
 
-## 🗄️ Base de Datos
+## 🗄️ Database
 
-### Migraciones
+### Migrations
 
 ```bash
-# Generar nueva migración
+# Generate new migration
 npm run migration:generate -- src/database/migrations/MigrationName
 
-# Ejecutar migraciones
+# Run migrations
 npm run migration:run
 
-# Revertir última migración
+# Revert last migration
 npm run migration:revert
 ```
 
-### Datos de Prueba
+### Test Data
 
 ```bash
-# Cargar datos de prueba
+# Load test data
 npm run seed
 ```
 
-El script de seed crea:
-- 3 películas de ejemplo
-- 3 salas de cine con diferentes capacidades
-- 3 funciones programadas para fechas futuras
+The seed script creates:
 
-## 🔒 Validaciones Implementadas
+- 3 sample movies
+- 3 cinema theaters with different capacities
+- 3 showtimes scheduled for future dates
 
-### Funciones (Showtimes)
-- ❌ No se pueden crear funciones en el pasado
-- ✅ Validación de existencia de película y sala
-- ✅ Validación de formato de fecha y precio
+## 🔒 Implemented Validations
+
+### Showtimes
+
+- ❌ Cannot create showtimes in the past
+- ✅ Movie and cinema theater existence validation
+- ✅ Date format and price validation
 
 ### Tickets
-- ❌ No se puede superar la capacidad de la sala
-- ❌ No se puede ocupar el mismo asiento dos veces
-- ✅ Validación de datos del cliente
-- ✅ Validación de existencia de la función
+
+- ❌ Cannot exceed cinema theater capacity
+- ❌ Cannot occupy the same seat twice
+- ✅ Customer data validation
+- ✅ Showtime existence validation
 
 ## 🐳 Docker
 
-### Desarrollo
+### Development
+
 ```bash
+# Configure environment first
+cp .env.example .env
+# Edit .env with your settings
+
+# Start with Docker Compose
 docker-compose up --build
 ```
 
-### Producción
+### Production
+
 ```bash
 docker-compose -f docker-compose.prod.yml up --build
 ```
 
-## 📝 Ejemplos de Uso
+**Important**: Docker Compose reads configuration from `.env` file automatically. Make sure to configure your environment variables before running Docker commands.
 
-### Crear una película
+## 📝 Usage Examples
+
+### Create a movie
+
 ```bash
 curl -X POST http://localhost:3000/movies \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Avengers: Endgame",
-    "description": "Los Vengadores se unen para derrotar a Thanos",
+    "description": "The Avengers assemble to defeat Thanos",
     "duration": 181,
-    "genre": "Superhéroes",
+    "genre": "Superhero",
     "rating": "PG-13"
   }'
 ```
 
-### Crear una función
+### Create a showtime
+
 ```bash
 curl -X POST http://localhost:3000/showtimes \
   -H "Content-Type: application/json" \
@@ -240,21 +303,23 @@ curl -X POST http://localhost:3000/showtimes \
   }'
 ```
 
-### Comprar un ticket
+### Purchase a ticket
+
 ```bash
 curl -X POST http://localhost:3000/tickets \
   -H "Content-Type: application/json" \
   -d '{
     "showtimeId": 1,
-    "customerName": "Juan Pérez",
-    "customerEmail": "juan@email.com",
+    "customerName": "John Doe",
+    "customerEmail": "john@email.com",
     "seatNumber": "A1"
   }'
 ```
 
-## 🚀 Despliegue
+## 🚀 Deployment
 
-### Variables de Entorno para Producción
+### Environment Variables for Production
+
 ```env
 NODE_ENV=production
 PORT=3000
@@ -265,18 +330,25 @@ DB_PASSWORD=your-password
 DB_DATABASE=movies_db
 ```
 
-## 🤝 Contribución
+### Environment Configuration Notes
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+- **Local Development**: Configure `.env` file with your local database settings
+- **Docker**: Docker Compose automatically uses variables from `.env` file
+- **Production**: Set environment variables in your deployment platform
+- **Security**: Never commit `.env` file to version control (already in .gitignore)
 
-## 📄 Licencia
+## 🤝 Contributing
 
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-**Desarrollado por Armando Jose** 🎬
+**Developed by Armando Jose Peña Mujica** 🎬

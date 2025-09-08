@@ -1,9 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ShowtimesService } from './showtimes.service';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
 import { UpdateShowtimeDto } from './dto/update-showtime.dto';
 import { Showtime } from '../entities/showtime.entity';
+import {
+  SUCCESS_MESSAGES,
+  API_SUMMARIES,
+  API_DESCRIPTIONS,
+} from '../common/constants/messages.constants';
 
 @ApiTags('showtimes')
 @Controller('showtimes')
@@ -11,44 +26,110 @@ export class ShowtimesController {
   constructor(private readonly showtimesService: ShowtimesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Crear una nueva función' })
-  @ApiResponse({ status: 201, description: 'Función creada exitosamente', type: Showtime })
-  create(@Body() createShowtimeDto: CreateShowtimeDto) {
-    return this.showtimesService.create(createShowtimeDto);
+  @ApiOperation({ summary: API_SUMMARIES.CREATE_SHOWTIME })
+  @ApiResponse({
+    status: 201,
+    description: SUCCESS_MESSAGES.SHOWTIME_CREATED,
+    type: Showtime,
+  })
+  async create(@Body() createShowtimeDto: CreateShowtimeDto) {
+    try {
+      return await this.showtimesService.create(createShowtimeDto);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Get()
-  @ApiOperation({ summary: 'Obtener todas las funciones' })
-  @ApiResponse({ status: 200, description: 'Lista de funciones', type: [Showtime] })
-  findAll() {
-    return this.showtimesService.findAll();
+  @ApiOperation({ summary: API_SUMMARIES.GET_ALL_SHOWTIMES })
+  @ApiResponse({
+    status: 200,
+    description: API_DESCRIPTIONS.SHOWTIMES_LIST,
+    type: [Showtime],
+  })
+  async findAll() {
+    try {
+      return await this.showtimesService.findAll();
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Obtener una función por ID' })
-  @ApiResponse({ status: 200, description: 'Función encontrada', type: Showtime })
-  findOne(@Param('id') id: string) {
-    return this.showtimesService.findOne(+id);
+  @ApiOperation({ summary: API_SUMMARIES.GET_SHOWTIME_BY_ID })
+  @ApiResponse({
+    status: 200,
+    description: API_DESCRIPTIONS.SHOWTIME_FOUND,
+    type: Showtime,
+  })
+  async findOne(@Param('id') id: string) {
+    try {
+      return await this.showtimesService.findOne(+id);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Get(':id/available-seats')
-  @ApiOperation({ summary: 'Obtener asientos disponibles para una función' })
-  @ApiResponse({ status: 200, description: 'Número de asientos disponibles' })
-  getAvailableSeats(@Param('id') id: string) {
-    return this.showtimesService.getAvailableSeats(+id);
+  @ApiOperation({ summary: API_SUMMARIES.GET_AVAILABLE_SEATS })
+  @ApiResponse({
+    status: 200,
+    description: API_DESCRIPTIONS.AVAILABLE_SEATS_COUNT,
+  })
+  async getAvailableSeats(@Param('id') id: string) {
+    try {
+      const availableSeats = await this.showtimesService.getAvailableSeats(+id);
+      return { availableSeats };
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Actualizar una función' })
-  @ApiResponse({ status: 200, description: 'Función actualizada', type: Showtime })
-  update(@Param('id') id: string, @Body() updateShowtimeDto: UpdateShowtimeDto) {
-    return this.showtimesService.update(+id, updateShowtimeDto);
+  @ApiOperation({ summary: API_SUMMARIES.UPDATE_SHOWTIME })
+  @ApiResponse({
+    status: 200,
+    description: SUCCESS_MESSAGES.SHOWTIME_UPDATED,
+    type: Showtime,
+  })
+  async update(
+    @Param('id') id: string,
+    @Body() updateShowtimeDto: UpdateShowtimeDto,
+  ) {
+    try {
+      return await this.showtimesService.update(+id, updateShowtimeDto);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Eliminar una función' })
-  @ApiResponse({ status: 200, description: 'Función eliminada' })
-  remove(@Param('id') id: string) {
-    return this.showtimesService.remove(+id);
+  @ApiOperation({ summary: API_SUMMARIES.DELETE_SHOWTIME })
+  @ApiResponse({ status: 200, description: SUCCESS_MESSAGES.SHOWTIME_DELETED })
+  async remove(@Param('id') id: string) {
+    try {
+      await this.showtimesService.remove(+id);
+      return { message: SUCCESS_MESSAGES.SHOWTIME_DELETED };
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

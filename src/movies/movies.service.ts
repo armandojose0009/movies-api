@@ -1,9 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Movie } from '../entities/movie.entity';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
+import { ERROR_MESSAGES } from '../common/constants/messages.constants';
 
 @Injectable()
 export class MoviesService {
@@ -12,31 +17,56 @@ export class MoviesService {
     private movieRepository: Repository<Movie>,
   ) {}
 
-  create(createMovieDto: CreateMovieDto): Promise<Movie> {
-    const movie = this.movieRepository.create(createMovieDto);
-    return this.movieRepository.save(movie);
+  async create(createMovieDto: CreateMovieDto): Promise<Movie> {
+    try {
+      const movie = this.movieRepository.create(createMovieDto);
+      return await this.movieRepository.save(movie);
+    } catch (error) {
+      throw new InternalServerErrorException('Error creating movie');
+    }
   }
 
-  findAll(): Promise<Movie[]> {
-    return this.movieRepository.find();
+  async findAll(): Promise<Movie[]> {
+    try {
+      return await this.movieRepository.find();
+    } catch (error) {
+      throw new InternalServerErrorException('Error fetching movies');
+    }
   }
 
   async findOne(id: number): Promise<Movie> {
-    const movie = await this.movieRepository.findOne({ where: { id } });
-    if (!movie) {
-      throw new NotFoundException(`Movie with ID ${id} not found`);
+    try {
+      const movie = await this.movieRepository.findOne({ where: { id } });
+      if (!movie) {
+        throw new NotFoundException(
+          ERROR_MESSAGES.MOVIE_NOT_FOUND.replace('{id}', id.toString()),
+        );
+      }
+      return movie;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error fetching movie');
     }
-    return movie;
   }
 
   async update(id: number, updateMovieDto: UpdateMovieDto): Promise<Movie> {
-    await this.findOne(id);
-    await this.movieRepository.update(id, updateMovieDto);
-    return this.findOne(id);
+    try {
+      await this.findOne(id);
+      await this.movieRepository.update(id, updateMovieDto);
+      return this.findOne(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error updating movie');
+    }
   }
 
   async remove(id: number): Promise<void> {
-    const movie = await this.findOne(id);
-    await this.movieRepository.remove(movie);
+    try {
+      const movie = await this.findOne(id);
+      await this.movieRepository.remove(movie);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error deleting movie');
+    }
   }
 }

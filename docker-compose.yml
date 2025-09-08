@@ -1,17 +1,12 @@
-version: '3.8'
-
 services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - '${PORT:-3000}:${PORT:-3000}'
+    env_file:
+      - .env
     environment:
-      - NODE_ENV=production
       - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USERNAME=movies_user
-      - DB_PASSWORD=movies_pass
-      - DB_DATABASE=movies_db
     depends_on:
       - postgres
     volumes:
@@ -21,11 +16,11 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_USER=movies_user
-      - POSTGRES_PASSWORD=movies_pass
-      - POSTGRES_DB=movies_db
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE}
     ports:
-      - "5432:5432"
+      - '${DB_PORT:-5432}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

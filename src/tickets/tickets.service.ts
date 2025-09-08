@@ -1,9 +1,15 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ticket } from '../entities/ticket.entity';
 import { ShowtimesService } from '../showtimes/showtimes.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
+import { ERROR_MESSAGES } from '../common/constants/messages.constants';
 
 @Injectable()
 export class TicketsService {
@@ -14,55 +20,86 @@ export class TicketsService {
   ) {}
 
   async create(createTicketDto: CreateTicketDto): Promise<Ticket> {
-    const { showtimeId, seatNumber } = createTicketDto;
+    try {
+      const { showtimeId, seatNumber } = createTicketDto;
 
-    // Validar que la función existe
-    const showtime = await this.showtimesService.findOne(showtimeId);
+      await this.showtimesService.findOne(showtimeId);
 
-    // Verificar que no se supere la capacidad
-    const availableSeats = await this.showtimesService.getAvailableSeats(showtimeId);
-    if (availableSeats <= 0) {
-      throw new BadRequestException('No hay asientos disponibles para esta función');
+      const availableSeats =
+        await this.showtimesService.getAvailableSeats(showtimeId);
+      if (availableSeats <= 0) {
+        throw new BadRequestException(ERROR_MESSAGES.NO_SEATS_AVAILABLE);
+      }
+
+      const existingTicket = await this.ticketRepository.findOne({
+        where: { showtimeId, seatNumber },
+      });
+      if (existingTicket) {
+        throw new BadRequestException(
+          ERROR_MESSAGES.SEAT_OCCUPIED.replace('{seat}', seatNumber),
+        );
+      }
+
+      const ticket = this.ticketRepository.create(createTicketDto);
+      return await this.ticketRepository.save(ticket);
+    } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      )
+        throw error;
+      throw new InternalServerErrorException('Error creating ticket');
     }
-
-    // Verificar que el asiento no esté ocupado
-    const existingTicket = await this.ticketRepository.findOne({
-      where: { showtimeId, seatNumber },
-    });
-    if (existingTicket) {
-      throw new BadRequestException(`El asiento ${seatNumber} ya está ocupado`);
-    }
-
-    const ticket = this.ticketRepository.create(createTicketDto);
-    return this.ticketRepository.save(ticket);
   }
 
-  findAll(): Promise<Ticket[]> {
-    return this.ticketRepository.find({
-      relations: ['showtime', 'showtime.movie', 'showtime.cinema'],
-    });
+  async findAll(): Promise<Ticket[]> {
+    try {
+      return await this.ticketRepository.find({
+        relations: ['showtime', 'showtime.movie', 'showtime.cinema'],
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Error fetching tickets');
+    }
   }
 
   async findOne(id: number): Promise<Ticket> {
-    const ticket = await this.ticketRepository.findOne({
-      where: { id },
-      relations: ['showtime', 'showtime.movie', 'showtime.cinema'],
-    });
-    if (!ticket) {
-      throw new NotFoundException(`Ticket with ID ${id} not found`);
+    try {
+      const ticket = await this.ticketRepository.findOne({
+        where: { id },
+        relations: ['showtime', 'showtime.movie', 'showtime.cinema'],
+      });
+      if (!ticket) {
+        throw new NotFoundException(
+          ERROR_MESSAGES.TICKET_NOT_FOUND.replace('{id}', id.toString()),
+        );
+      }
+      return ticket;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error fetching ticket');
     }
-    return ticket;
   }
 
   async findByShowtime(showtimeId: number): Promise<Ticket[]> {
-    return this.ticketRepository.find({
-      where: { showtimeId },
-      relations: ['showtime'],
-    });
+    try {
+      return await this.ticketRepository.find({
+        where: { showtimeId },
+        relations: ['showtime'],
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error fetching tickets by showtime',
+      );
+    }
   }
 
   async remove(id: number): Promise<void> {
-    const ticket = await this.findOne(id);
-    await this.ticketRepository.remove(ticket);
+    try {
+      const ticket = await this.findOne(id);
+      await this.ticketRepository.remove(ticket);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error deleting ticket');
+    }
   }
 }

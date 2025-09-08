@@ -7,11 +7,7 @@ import { MoviesModule } from '../movies/movies.module';
 import { CinemasModule } from '../cinemas/cinemas.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Showtime]),
-    MoviesModule,
-    CinemasModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Showtime]), MoviesModule, CinemasModule],
   controllers: [ShowtimesController],
   providers: [ShowtimesService],
   exports: [ShowtimesService],

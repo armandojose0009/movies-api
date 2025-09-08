@@ -1,9 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { MoviesService } from './movies.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from '../entities/movie.entity';
+import {
+  SUCCESS_MESSAGES,
+  API_SUMMARIES,
+  API_DESCRIPTIONS,
+} from '../common/constants/messages.constants';
 
 @ApiTags('movies')
 @Controller('movies')
@@ -11,37 +26,92 @@ export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Crear una nueva película' })
-  @ApiResponse({ status: 201, description: 'Película creada exitosamente', type: Movie })
-  create(@Body() createMovieDto: CreateMovieDto) {
-    return this.moviesService.create(createMovieDto);
+  @ApiOperation({ summary: API_SUMMARIES.CREATE_MOVIE })
+  @ApiResponse({
+    status: 201,
+    description: SUCCESS_MESSAGES.MOVIE_CREATED,
+    type: Movie,
+  })
+  async create(@Body() createMovieDto: CreateMovieDto) {
+    try {
+      return await this.moviesService.create(createMovieDto);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Get()
-  @ApiOperation({ summary: 'Obtener todas las películas' })
-  @ApiResponse({ status: 200, description: 'Lista de películas', type: [Movie] })
-  findAll() {
-    return this.moviesService.findAll();
+  @ApiOperation({ summary: API_SUMMARIES.GET_ALL_MOVIES })
+  @ApiResponse({
+    status: 200,
+    description: API_DESCRIPTIONS.MOVIES_LIST,
+    type: [Movie],
+  })
+  async findAll() {
+    try {
+      return await this.moviesService.findAll();
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Obtener una película por ID' })
-  @ApiResponse({ status: 200, description: 'Película encontrada', type: Movie })
-  findOne(@Param('id') id: string) {
-    return this.moviesService.findOne(+id);
+  @ApiOperation({ summary: API_SUMMARIES.GET_MOVIE_BY_ID })
+  @ApiResponse({
+    status: 200,
+    description: API_DESCRIPTIONS.MOVIE_FOUND,
+    type: Movie,
+  })
+  async findOne(@Param('id') id: string) {
+    try {
+      return await this.moviesService.findOne(+id);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Actualizar una película' })
-  @ApiResponse({ status: 200, description: 'Película actualizada', type: Movie })
-  update(@Param('id') id: string, @Body() updateMovieDto: UpdateMovieDto) {
-    return this.moviesService.update(+id, updateMovieDto);
+  @ApiOperation({ summary: API_SUMMARIES.UPDATE_MOVIE })
+  @ApiResponse({
+    status: 200,
+    description: SUCCESS_MESSAGES.MOVIE_UPDATED,
+    type: Movie,
+  })
+  async update(
+    @Param('id') id: string,
+    @Body() updateMovieDto: UpdateMovieDto,
+  ) {
+    try {
+      return await this.moviesService.update(+id, updateMovieDto);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Eliminar una película' })
-  @ApiResponse({ status: 200, description: 'Película eliminada' })
-  remove(@Param('id') id: string) {
-    return this.moviesService.remove(+id);
+  @ApiOperation({ summary: API_SUMMARIES.DELETE_MOVIE })
+  @ApiResponse({ status: 200, description: SUCCESS_MESSAGES.MOVIE_DELETED })
+  async remove(@Param('id') id: string) {
+    try {
+      await this.moviesService.remove(+id);
+      return { message: SUCCESS_MESSAGES.MOVIE_DELETED };
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

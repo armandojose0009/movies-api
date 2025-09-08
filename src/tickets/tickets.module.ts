@@ -6,10 +6,7 @@ import { Ticket } from '../entities/ticket.entity';
 import { ShowtimesModule } from '../showtimes/showtimes.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Ticket]),
-    ShowtimesModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Ticket]), ShowtimesModule],
   controllers: [TicketsController],
   providers: [TicketsService],
 })
