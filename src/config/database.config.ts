@@ -2,10 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { Movie } from '../entities/movie.entity';
-import { Cinema } from '../entities/cinema.entity';
-import { Showtime } from '../entities/showtime.entity';
-import { Ticket } from '../entities/ticket.entity';
 
 @Injectable()
 export class DatabaseConfig implements TypeOrmOptionsFactory {
@@ -19,8 +15,8 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
       username: this.configService.get('DB_USERNAME'),
       password: this.configService.get('DB_PASSWORD'),
       database: this.configService.get('DB_DATABASE'),
-      entities: [Movie, Cinema, Showtime, Ticket],
-      migrations: ['src/database/migrations/*.ts'],
+      entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+      migrations: ['dist/database/migrations/*.js'],
       synchronize: this.configService.get('NODE_ENV') === 'development',
     };
   }
@@ -33,7 +29,7 @@ export const dataSource = new DataSource({
   username: process.env.DB_USERNAME || 'movies_user',
   password: process.env.DB_PASSWORD || 'movies_pass',
   database: process.env.DB_DATABASE || 'movies_db',
-  entities: [Movie, Cinema, Showtime, Ticket],
-  migrations: ['src/database/migrations/*.ts'],
+  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+  migrations: ['dist/database/migrations/*.js'],
   synchronize: false,
 });
