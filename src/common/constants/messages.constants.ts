@@ -24,29 +24,25 @@ export const SUCCESS_MESSAGES = {
 };
 
 export const API_SUMMARIES = {
-  // Movies
   CREATE_MOVIE: 'Create a new movie',
   GET_ALL_MOVIES: 'Get all movies',
   GET_MOVIE_BY_ID: 'Get a movie by ID',
   UPDATE_MOVIE: 'Update a movie',
   DELETE_MOVIE: 'Delete a movie',
-  
-  // Cinemas
+
   CREATE_CINEMA: 'Create a new cinema',
   GET_ALL_CINEMAS: 'Get all cinemas',
   GET_CINEMA_BY_ID: 'Get a cinema by ID',
   UPDATE_CINEMA: 'Update a cinema',
   DELETE_CINEMA: 'Delete a cinema',
-  
-  // Showtimes
+
   CREATE_SHOWTIME: 'Create a new showtime',
   GET_ALL_SHOWTIMES: 'Get all showtimes',
   GET_SHOWTIME_BY_ID: 'Get a showtime by ID',
   GET_AVAILABLE_SEATS: 'Get available seats for a showtime',
   UPDATE_SHOWTIME: 'Update a showtime',
   DELETE_SHOWTIME: 'Delete a showtime',
-  
-  // Tickets
+
   PURCHASE_TICKET: 'Purchase a ticket',
   GET_ALL_TICKETS: 'Get all tickets',
   GET_TICKET_BY_ID: 'Get a ticket by ID',

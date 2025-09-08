@@ -6,6 +6,7 @@ import { MoviesModule } from './movies/movies.module';
 import { CinemasModule } from './cinemas/cinemas.module';
 import { ShowtimesModule } from './showtimes/showtimes.module';
 import { TicketsModule } from './tickets/tickets.module';
+import { DatabaseInitService } from './database/database-init.service';
 
 @Module({
   imports: [
@@ -20,5 +21,6 @@ import { TicketsModule } from './tickets/tickets.module';
     ShowtimesModule,
     TicketsModule,
   ],
+  providers: [DatabaseInitService],
 })
 export class AppModule {}

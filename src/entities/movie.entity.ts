@@ -18,7 +18,7 @@ export class Movie {
 
   @ApiProperty()
   @Column()
-  duration: number; // en minutos
+  duration: number;
 
   @ApiProperty()
   @Column()
@@ -28,6 +28,6 @@ export class Movie {
   @Column()
   rating: string;
 
-  @OneToMany(() => Showtime, showtime => showtime.movie)
+  @OneToMany(() => Showtime, (showtime) => showtime.movie)
   showtimes: Showtime[];
 }

@@ -10,7 +10,6 @@ async function seed() {
   const cinemaRepository = dataSource.getRepository(Cinema);
   const showtimeRepository = dataSource.getRepository(Showtime);
 
-  // Crear películas
   const movies = await movieRepository.save([
     {
       title: 'Avatar: El Camino del Agua',
@@ -35,7 +34,6 @@ async function seed() {
     },
   ]);
 
-  // Crear salas de cine
   const cinemas = await cinemaRepository.save([
     {
       name: 'Sala IMAX',
@@ -54,7 +52,6 @@ async function seed() {
     },
   ]);
 
-  // Crear funciones (fechas futuras)
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(14, 0, 0, 0);
@@ -68,19 +65,19 @@ async function seed() {
       movieId: movies[0].id,
       cinemaId: cinemas[0].id,
       startTime: tomorrow,
-      price: 25.50,
+      price: 25.5,
     },
     {
       movieId: movies[1].id,
       cinemaId: cinemas[1].id,
       startTime: dayAfterTomorrow,
-      price: 22.00,
+      price: 22.0,
     },
     {
       movieId: movies[2].id,
       cinemaId: cinemas[2].id,
-      startTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 días
-      price: 30.00,
+      startTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+      price: 30.0,
     },
   ]);
 
